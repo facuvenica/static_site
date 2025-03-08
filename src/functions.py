@@ -7,15 +7,15 @@ def split_nodes_delimiter(nodos, delimitador, type_text):
     retval = []
     for nodo in nodos:
         if nodo.text_type == TextType.TEXT:
-            texto = nodo.text.split(delimitador)
+            if nodo.text.count(delimitador) % 2 != 0:
+                raise Exception(f'Sintaxis Markdown invalida: {nodo.text}')
+            else:
+                texto = nodo.text.split(delimitador)
 
-            if len(texto) % 2 == 0:
-                raise Exception('Sintaxis Markdown invalida.')
-            
-            for split in texto:
-                indice = texto.index(split)
-                tipo = TextType.TEXT if indice % 2 == 0 else type_text
-                retval.append(TextNode(split,tipo))
+                for split in texto:
+                    indice = texto.index(split)
+                    tipo = TextType.TEXT if indice % 2 == 0 else type_text
+                    retval.append(TextNode(split,tipo))
         else:
             retval.append(nodo)
 
@@ -66,7 +66,7 @@ def text_to_textnodes(texto):
     nodo = TextNode(texto,TextType.TEXT)
 
     nodos = split_nodes_delimiter([nodo], '**', TextType.BOLD)
-    nodos = split_nodes_delimiter(nodos, '*', TextType.ITALIC)
+    nodos = split_nodes_delimiter(nodos, '_', TextType.ITALIC)
     nodos = split_nodes_delimiter(nodos, '`', TextType.CODE)
     nodos = split_nodes_element(nodos,TextType.IMAGE)
     nodos = split_nodes_element(nodos,TextType.LINK)

@@ -1,4 +1,4 @@
-from shutil import copytree, copy2
+from shutil import copytree
 from pathlib import Path
 
 from functions import markdown_to_title, markdown_to_html_node
@@ -28,7 +28,7 @@ def create_folder(dest):
         dest.mkdir()
 
 
-def generate_pages_recursively(source, template, dest):
+def generate_pages_recursively(source, template, dest, basepath):
 
     for file in source.iterdir():
 
@@ -38,9 +38,12 @@ def generate_pages_recursively(source, template, dest):
         if file.is_dir():
             if not new_path.exists():
                 create_folder(new_path)
-            generate_pages_recursively(file, template, new_path)
+            generate_pages_recursively(file, template, new_path, basepath)
 
-        if file.is_file() and '.md' in dir:
+        if not file.is_file():
+            continue
+
+        if '.md' in dir:
             dir = str(new_path)
             new_path = Path(dir.replace('.md', '.html'))
 
@@ -56,7 +59,12 @@ def generate_pages_recursively(source, template, dest):
             temp = temp.replace("{{ Title }}", title)
             # Set the html
             temp = temp.replace("{{ Content }}", html)
+            # Fix local urls
+            temp = temp.replace('href="/', f'href="{basepath}')
+            temp = temp.replace('src="/', f'src="{basepath}')
+
             new_path.write_text(temp)
-        elif file.is_file():
+            print(f"{new_path} successfully created")
+        else:
             temp = file.read_bytes()
             new_path.write_bytes()
