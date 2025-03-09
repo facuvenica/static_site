@@ -1,21 +1,26 @@
 import re
 
 from textnode import TextType, TextNode
-from htmlnode import ParentNode, LeafNode
+from htmlnode import ParentNode
 
 def split_nodes_delimiter(nodos, delimitador, type_text):
     retval = []
     for nodo in nodos:
         if nodo.text_type == TextType.TEXT:
-            if nodo.text.count(delimitador) % 2 != 0:
-                raise Exception(f'Sintaxis Markdown invalida: {nodo.text}')
-            else:
-                texto = nodo.text.split(delimitador)
+            instances = nodo.text.count(delimitador)
+            false_pos = re.findall(r"(\w_\w)", nodo.text)
 
-                for split in texto:
-                    indice = texto.index(split)
-                    tipo = TextType.TEXT if indice % 2 == 0 else type_text
-                    retval.append(TextNode(split,tipo))
+            if instances % 2 != 0 and not false_pos:
+                raise Exception(f'Sintaxis Markdown invalida: {nodo.text}')
+
+            max = instances - len(false_pos) if len(false_pos) > 1 else instances
+
+            texto = nodo.text.split(delimitador, max)
+
+            for split in texto:
+                indice = texto.index(split)
+                tipo = TextType.TEXT if indice % 2 == 0 else type_text
+                retval.append(TextNode(split,tipo))
         else:
             retval.append(nodo)
 
@@ -66,10 +71,12 @@ def text_to_textnodes(texto):
     nodo = TextNode(texto,TextType.TEXT)
 
     nodos = split_nodes_delimiter([nodo], '**', TextType.BOLD)
-    nodos = split_nodes_delimiter(nodos, '_', TextType.ITALIC)
     nodos = split_nodes_delimiter(nodos, '`', TextType.CODE)
+
     nodos = split_nodes_element(nodos,TextType.IMAGE)
     nodos = split_nodes_element(nodos,TextType.LINK)
+
+    nodos = split_nodes_delimiter(nodos, '_', TextType.ITALIC)
 
     return nodos
 
@@ -93,6 +100,9 @@ def text_to_list_node(texto, tipo):
 
     for item in lista:
         content = item[2:] if tag == 'ul' else item[3:]
+        if item[2] == "[":
+            content = item[1:]
+            
         children.append(ParentNode('li', text_to_textnodes(content)))
 
     return ParentNode(tag, children)

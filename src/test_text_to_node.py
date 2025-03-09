@@ -2,7 +2,7 @@ from textnode import TextNode, TextType
 from functions import text_to_textnodes
 
 def test_text_to_node():
-    test_case = ("Esto es **texto** con una *palabra* en cursiva y un `poco de"
+    test_case = ("Esto es **texto** con una _palabra_ en cursiva y un `poco de"
                  " codigo` seguido de una ![imagen de obi wan](https://i.imgur"
                  ".com/fJRm4Vk.jpeg) y un [enlace](https://boot.dev)")
 

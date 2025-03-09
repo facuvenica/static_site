@@ -5,7 +5,7 @@ from textnode import TextNode, TextType
 
 TEST_CASES = [
     TextNode("Este es un **TextNode** con negrita", TextType.TEXT),
-    TextNode("Este tiene *cursiva* tambien", TextType.TEXT),
+    TextNode("Este tiene _cursiva_ tambien", TextType.TEXT),
     TextNode("Este es un enlace", TextType.LINK, 'url_to_test'),
     TextNode('Este tiene `<a href="test_url">link</a>` como ejemplo de codigo', TextType.TEXT),
     TextNode("Kitten", TextType.IMAGE, 'url_to_image'),
@@ -28,14 +28,14 @@ def test_invalid_bold():
 
 def test_invalid_italic():
     test = [
-        TextNode("Este no termina de definir la *cursiva", TextType.TEXT),
-        TextNode("Este *define* pero inicia: * una lista", TextType.TEXT),
-        TextNode("Este *intenta* y **progresa** pero no *", TextType.TEXT),
+        TextNode("Este no termina de definir la _cursiva", TextType.TEXT),
+        TextNode("Este _define_ pero inicia _una lista", TextType.TEXT),
+        TextNode("Este _intenta_ y **progresa** pero no _", TextType.TEXT),
     ]
 
     for each in test:
         with pytest.raises(Exception, match='Sintaxis Markdown invalida'):
-            split_nodes_delimiter([each],'*', TextType.ITALIC)
+            split_nodes_delimiter([each],'_', TextType.ITALIC)
 
 
 def test_invalid_code():
@@ -70,7 +70,7 @@ def test_italic():
         TextNode(" tambien", TextType.TEXT),
     ]
 
-    assert split_nodes_delimiter([TEST_CASES[1]], '*', TextType.ITALIC) == res
+    assert split_nodes_delimiter([TEST_CASES[1]], '_', TextType.ITALIC) == res
 
 def test_code():
     res = [
@@ -99,8 +99,8 @@ def test_all():
     ]
 
     retval = split_nodes_delimiter(TEST_CASES,'**',TextType.BOLD)
-    retval = split_nodes_delimiter(retval,'*',TextType.ITALIC)
     retval = split_nodes_delimiter(retval,'`',TextType.CODE)
+    retval = split_nodes_delimiter(retval,'_',TextType.ITALIC)
 
     assert retval == expected
 
